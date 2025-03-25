@@ -4,6 +4,9 @@ import csv
 import os
 from datetime import datetime
 
+
+
+# Get data from source website
 def get_data(page_number):
     headers = {
         'Accept': '*/*',
@@ -33,8 +36,8 @@ def get_data(page_number):
     
     try:
         response = requests.post('https://mediere.anofm.ro/api/entity/vw_public_job_posting', 
-                                 headers=headers, 
-                                 json=data)
+                                headers=headers, 
+                                json=data)
         response.raise_for_status()  # Check for HTTP errors
         rows = response.json()['rows']
         
@@ -51,6 +54,7 @@ def get_data(page_number):
     except requests.exceptions.RequestException:
         return []
 
+# Clean the salary value none to 0 and string to decimal
 def clean_row(row):
     """Replace None values with empty strings and convert salary to float"""
     cleaned_row = {}
@@ -59,13 +63,15 @@ def clean_row(row):
             cleaned_row[key] = ""
         elif key in ['minimum_salary', 'maximum_salary']:
             try:
-                cleaned_row[key] = float(value)
+                cleaned_row[key] = float(value) # like "5000" to 5000.0
             except (ValueError, TypeError):
                 cleaned_row[key] = 0.0
         else:
             cleaned_row[key] = value
     return cleaned_row
 
+
+# Get all our existing Jobs
 def get_existing_jobs():
     """Read existing jobs from CSV file"""
     try:
@@ -74,6 +80,8 @@ def get_existing_jobs():
     except FileNotFoundError:
         return []
 
+
+# Get all the new jobs after scrape
 def get_new_jobs_list():
     """Read jobs from new_jobs.csv"""
     try:
@@ -82,6 +90,8 @@ def get_new_jobs_list():
     except FileNotFoundError:
         return []
 
+
+# Save jobs to csv
 def save_jobs_to_csv(jobs, filename):
     """Save jobs to CSV file"""
     if not jobs:
@@ -93,10 +103,13 @@ def save_jobs_to_csv(jobs, filename):
         writer.writeheader()
         writer.writerows(jobs)
 
+# Check if the job is a new job or existing
 def is_new_job(job, existing_jobs):
     """Check if job is not in existing jobs using the id field"""
     return not any(str(existing['id']) == str(job['id']) for existing in existing_jobs)
 
+
+# Delete all the csv file before a new run
 def cleanup_files():
     """Remove new_jobs.csv at start of each run"""
     try:
@@ -111,7 +124,7 @@ def cleanup_files():
         pass
 
 def main():
-    # Clean up previous new_jobs.csv and job_postings.csv
+    # Remove previous new_jobs.csv and job_postings.csv
     cleanup_files()
     
     # Get existing jobs

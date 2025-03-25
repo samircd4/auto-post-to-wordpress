@@ -9,24 +9,20 @@ from datetime import datetime
 import logging
 
 # Custom module
-from scraper import main as get_data
-from delete_meta import delete_job_metadata
+from scraper import main as get_data # the scraper will scrape data from website
+from delete_meta import delete_job_metadata # delete all the postmeta data
 
 dotenv.load_dotenv()
-
+# This is database credentials from .env file
 DB_PASSWORD = os.getenv('DB_PASSWORD')
 DB_USER = os.getenv('DB_USER')
 DB_NAME = os.getenv('DB_NAME')
 DB_HOST = os.getenv('DB_HOST')
 
-# Custom user details
-USER_NAME = "Samir Das"
-USER_EMAIL = "samircd4@gmail.com"
-USER_WHATSAPP = "+8801781355377"
-
-# Logging Configuration
+# Logging path to save lof information
 LOG_FILE_PATH = "/home2/obpeavmy/drpython/logs/app_logs.log"
 
+# Configure the logger to save log information
 def setup_logger():
     """Set up logging configuration"""
     logger = logging.getLogger("JobScraper")
@@ -52,7 +48,7 @@ def setup_logger():
 
 logger = setup_logger()
 
-
+# Create a connection with database
 def create_connection():
     """Create connection with database"""
     try:
@@ -69,6 +65,7 @@ def create_connection():
         logger.error(f"Error while connecting to MySQL: {e}")
         return None
 
+# Format the date as DD-MM-YYYY
 def format_date(date_str):
     """Convert date from YYYY-MM-DD to DD-MM-YYYY format"""
     try:
@@ -79,7 +76,7 @@ def format_date(date_str):
     except (ValueError, TypeError):
         return date_str  # Return original if conversion fails
 
-
+# Insert job into JJ3_posts database
 def insert_job(connection, job_data):
     """Insert job data into WordPress posts table with proper formatting"""
     try:
@@ -149,6 +146,8 @@ def insert_job(connection, job_data):
         connection.rollback()
         return False
 
+
+# Inser post metada into JJ3_postmeta
 def insert_postmeta(connection, post_id, job_data):
     """Insert postmeta data into the JJ3_postmeta table"""
     try:
@@ -184,6 +183,7 @@ def insert_postmeta(connection, post_id, job_data):
         connection.rollback()
         return False
 
+# To read our csv file which is already in our database
 def read_jobs_csv(csv_path):
     """Read existing jobs from CSV file with robust encoding handling"""
     try:

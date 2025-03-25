@@ -1,3 +1,5 @@
+# This script will run before a new cron job to delete all of our jobs from database
+
 import mysql.connector
 from mysql.connector import Error
 import os
@@ -10,6 +12,8 @@ DB_USER = os.getenv('DB_USER')
 DB_NAME = os.getenv('DB_NAME')
 DB_HOST = os.getenv('DB_HOST')
 
+
+# Create a connection with the database
 def create_connection():
     """Create connection with database"""
     try:
@@ -24,6 +28,8 @@ def create_connection():
     except Error as e:
         return None
 
+
+# Delete all the jobs metadata from JJ3_postmeta and all the jobs from JJ3_posts
 def delete_job_metadata():
     """Delete all job metadata from JJ3_postmeta table"""
     connection = create_connection()
